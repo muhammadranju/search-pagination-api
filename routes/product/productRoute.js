@@ -1,12 +1,12 @@
 const product = require("express").Router();
-const productCon = require("../../controller/product/productController");
+const productController = require("../../controller/product/productController");
 
-product.get("/products/:id", productCon.productsGetByIdController);
-product.put("/products/:id", productCon.productsPutByIdController);
-product.patch("/products/:id", productCon.productsPatchByIdController);
-product.delete("/products/:id", productCon.productsDeleteByIdController);
+product.get("/products/:id", productController.productsGetByIdController);
+product.put("/products/:id", productController.productsPutByIdController);
+product.patch("/products/:id", productController.productsPatchByIdController);
+product.delete("/products/:id", productController.productsDeleteByIdController);
 
-product.get("/products", productCon.productsGetController);
-product.post("/products", productCon.productsPostController);
+product.get("/products", productController.productsGetController);
+product.post("/products", productController.productsPostController);
 
 module.exports = product;

@@ -1,4 +1,6 @@
 const User = require("../../models/userModel/User");
+
+// User signup function (POST method)
 const userSignupPostController = async (req, res, next) => {
   try {
     const { username, email, password } = req.body;
@@ -17,6 +19,7 @@ const userSignupPostController = async (req, res, next) => {
   }
 };
 
+//TODO: User signup function (POST method)
 const userLoginPostController = async (req, res, next) => {
   try {
   } catch (error) {

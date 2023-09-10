@@ -4,6 +4,8 @@ const userRoute = require("./user/userRoute");
 
 preFix.use([productRoute, userRoute]);
 
+// TODO: remove This [ /, /health] routes in future
+
 preFix.get("/", (req, res) => {
   return res.status(200).send("<h1>Server is running...</h1>");
 });

@@ -1,28 +1,60 @@
 const Product = require("../../models/productModel/Product");
 
+//* get all products (GET method) function
 const productsGetController = async (req, res, next) => {
   try {
-    const { limit = "5", sort_by = "asc", page = "1", search = "" } = req.query;
+    let { size = 5, sort, page = 1, search = "" } = req.query || req.body;
+    const searchBody = req.body.search;
 
-    if (search) {
-      const findResult = await Product.find({ title: search });
-      if (!findResult) {
-        return res.status(400).send({ error: "filled are required" });
-      }
-      return res.status(200).send({ search: findResult });
+    size = +size; // convert to number
+    page = +page; // convert to number
+
+    if (!page) {
+      page = 1; // default page value 1
+    }
+    if (!size) {
+      size = 5; // default size value 1
+    }
+    const skip = (page - 1) * size; // skip logic for pagination
+    search = search.toLowerCase(); // convert to lowerCase string
+
+    // this search for only body requested
+    if (searchBody) {
+      const searchProduct = await Product.find({
+        $or: [
+          { title: { $regex: ".*" + searchBody + ".*", $options: "i" } },
+          { description: { $regex: ".*" + searchBody + ".*", $options: "i" } },
+        ],
+      })
+        .limit(size)
+        .skip(skip)
+        .sort(sort)
+        .populate("user", "username")
+        .select("title cover price description");
+
+      return res.status(200).send({ page, size, search: searchProduct });
     }
 
-    const products = await Product.find()
-      .limit(limit)
-      .sort({ updatedAt: sort_by })
+    //? this search query parameters any where
+    const products = await Product.find({
+      $or: [
+        { title: { $regex: ".*" + search + ".*", $options: "i" } },
+        { description: { $regex: ".*" + search + ".*", $options: "i" } },
+      ],
+    })
+      .limit(size)
+      .skip(skip)
+      .sort(sort)
       .populate("user", "username")
       .select("title cover price description");
-    return res.status(200).send({ products });
+
+    return res.status(200).send({ page, size, data: products });
   } catch (error) {
     next(error);
   }
 };
 
+//* Product creation (POST method) function
 const productsPostController = async (req, res, next) => {
   try {
     const { title, cover, price, description, user } = req.body;
@@ -42,7 +74,7 @@ const productsPostController = async (req, res, next) => {
     next(error);
   }
 };
-
+//* Get One (1) Product (GET method) id function
 const productsGetByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -57,6 +89,8 @@ const productsGetByIdController = async (req, res, next) => {
     next(error);
   }
 };
+
+//* Product update (PUT method) by Product id function
 const productsPutByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -75,6 +109,8 @@ const productsPutByIdController = async (req, res, next) => {
     next(error);
   }
 };
+
+//* Product update (PATCH method) by Product id function
 const productsPatchByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -97,6 +133,8 @@ const productsPatchByIdController = async (req, res, next) => {
     next(error);
   }
 };
+
+//* Product delete (DELETE method) by Product id function
 const productsDeleteByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
